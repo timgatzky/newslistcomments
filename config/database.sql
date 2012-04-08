@@ -26,6 +26,6 @@ CREATE TABLE `tl_module` (
 	`newslist_comments_messagebox_template` varchar(255) NOT NULL default '',
 	`newslist_comments_dateFormat` varchar(255) NOT NULL default '',
 	`newslist_comments_timeFormat` varchar(255) NOT NULL default '',
-	
+	`newslist_comments_sortBy` varchar(255) NOT NULL default '',
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 

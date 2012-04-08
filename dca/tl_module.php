@@ -44,7 +44,7 @@ array_insert($GLOBALS['TL_DCA']['tl_module']['palettes']['__selector__'],1,array
  */ 
 array_insert($GLOBALS['TL_DCA']['tl_module']['subpalettes'],1,array
 (
-	'addNewslistComments'	=> 'newslist_comments_limit,newslist_comments_maxLimit,newslist_comments_aliveTime,newslist_comments_annonymus,newslist_comments_dateFormat,newslist_comments_timeFormat,newslist_comments_alwaysShowDelete,newslist_comments_allowAll,newslist_comments_messagebox',
+	'addNewslistComments'	=> 'newslist_comments_limit,newslist_comments_maxLimit,newslist_comments_aliveTime,newslist_comments_annonymus,newslist_comments_dateFormat,newslist_comments_timeFormat,newslist_comments_sortBy,newslist_comments_alwaysShowDelete,newslist_comments_allowAll,newslist_comments_messagebox',
 	'newslist_comments_messagebox' => 'newslist_comments_messagebox_template',
 ));
 
@@ -156,6 +156,16 @@ $GLOBALS['TL_DCA']['tl_module']['fields']['newslist_comments_timeFormat'] = arra
 	'exclude'           => true,
 	'inputType'         => 'text',
 	'eval'              => array('tl_class'=>'w50')
+);
+
+$GLOBALS['TL_DCA']['tl_module']['fields']['newslist_comments_sortBy'] = array
+(
+	'label'				=> &$GLOBALS['TL_LANG']['tl_module']['newslist_comments_sortBy'],
+	'inputType' 		=> 'select',
+	'default'   		=> 'DESC',
+	'options'			=> array('DESC', 'ASC'),
+	'reference' 		=> &$GLOBALS['TL_LANG']['tl_module']['newslist_comments_sortBy'],
+	'eval'				=> array('tl_class'=>'w50')
 );
 
 

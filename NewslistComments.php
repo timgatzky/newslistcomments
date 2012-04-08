@@ -97,6 +97,7 @@ class NewslistComments extends Frontend
 				$this->strUnknownUser = $objModuleNewslists->newslist_comments_annonymus;
 				$this->strDateFormat = $objModuleNewslists->newslist_comments_dateFormat;
 				$this->strTimeFormat = $objModuleNewslists->newslist_comments_timeFormat;
+				$this->sortBy = $objModuleNewslists->newslist_comments_sortBy;
 			}
 		}
 		
@@ -301,9 +302,11 @@ class NewslistComments extends Frontend
 	public function getComments($id, $limit)
 	{
 		$this->import('Database');
-				
+		
+		
 		$arrComments = array();
-		$objComments = $this->Database->prepare("SELECT * FROM tl_comments WHERE parent=? AND published=1 AND source='tl_news' ORDER BY tstamp ASC")
+		
+		$objComments = $this->Database->prepare("SELECT * FROM tl_comments WHERE parent=? AND published=1 AND source='tl_news' ORDER BY tstamp " . $this->sortBy)
 						->limit($limit)
 						->execute($id);
 		
