@@ -44,7 +44,7 @@ class NewslistComments extends Frontend
 	protected $intMaxLimit;
 	protected $strDateFormat;
 	protected $strTimeFormat;
-	
+	protected $intAvatar;
 	
 	
 	/**
@@ -73,20 +73,6 @@ class NewslistComments extends Frontend
 			$arrArchives = deserialize($objModuleNewslists->news_archives);
 			if( in_array( $arrArticle['pid'], $arrArchives ) )
 			{
-				#$arrSettings[] = array
-				#(
-				#	'id' => $objModuleNewslists->id,
-				#	'pid' => $arrArticle['pid'],
-				#	'addNewslistComments'				=> 	$objModuleNewslists->addNewslistComments,			
-				#	'newslist_comments_limit' 			=>	$objModuleNewslists->newslist_comments_limit,	
-				#	'newslist_comments_maxLimit' 		=>	$objModuleNewslists->newslist_comments_maxLimit,		
-				#	'newslist_comments_annonymus' 		=>	$objModuleNewslists->newslist_comments_annonymus,	
-				#	'newslist_comments_aliveTime' 		=>	$objModuleNewslists->newslist_comments_aliveTime,	
-				#	'newslist_comments_alwaysShowDelete' =>	$objModuleNewslists->newslist_comments_alwaysShowDelete,		
-				#	'newslist_comments_allowAll' 		=>	$objModuleNewslists->newslist_comments_allowAll,		
-				#	'newslist_comments_limit' 			=>	$objModuleNewslists->newslist_comments_limit,	
-				#	'newslist_comments_messageBox' 		=>	$objModuleNewslists->newslist_comments_messageBox,	
-				#);
 				$this->addComments = $objModuleNewslists->addNewslistComments;
 				$this->intLimit = $objModuleNewslists->newslist_comments_limit;
 				$this->intMaxLimit = $objModuleNewslists->newslist_comments_maxLimit;
@@ -98,6 +84,8 @@ class NewslistComments extends Frontend
 				$this->strDateFormat = $objModuleNewslists->newslist_comments_dateFormat;
 				$this->strTimeFormat = $objModuleNewslists->newslist_comments_timeFormat;
 				$this->sortBy = $objModuleNewslists->newslist_comments_sortBy;
+				$this->avatar =  $objModuleNewslists->newslist_comments_avatar;
+				$this->avatarSize =  $objModuleNewslists->newslist_comments_avatarSize;
 			}
 		}
 		
@@ -116,7 +104,6 @@ class NewslistComments extends Frontend
 		
 		// add comments to template
 		$arrComments = $this->getComments($arrArticle['id'], $this->intMaxLimit);
-		$objTemplate->comments = $arrComments;
 		
 		if($this->intMaxLimit != 0)
 		{
@@ -130,9 +117,33 @@ class NewslistComments extends Frontend
 		// Check publishing status
 		$username = $this->replaceInsertTags('{{user::username}}');
 		strlen($username) ?  $objTemplate->loggedIn = true :  $objTemplate->loggedIn = false;
+		
 		// Allow all users
 		$objTemplate->allowAll = $this->intAllowAll;
 		
+		// Avatar
+		if( $this->avatar && in_array('avatar', $this->Config->getActiveModules() ) )
+		{
+			foreach($arrComments as $i => $comment)
+			{
+				if($comment['name'] != $this->strUnknownUser)
+				{
+					$strAvatarUrl = $this->getAvatar($comment['name'], 'tl_member');
+					$arrComments[$i]['avatar'] = $strAvatarUrl;
+					
+					// Overwrite avatar size
+					if(strlen($this->avatarSize))
+					{
+						$size = deserialize($this->avatarSize);
+						$arrComments[$i]['avatar'] = $this->getImage($strAvatarUrl, $size[0],$size[1],$size[2] );
+					}
+				}
+			}
+		}
+		
+		// add comments to template
+		$objTemplate->comments = $arrComments;
+				
 		// Start process when there is POST information submitted by a form
 		if(strlen($_POST['FORM_SUBMIT']))
 		{
@@ -294,6 +305,18 @@ class NewslistComments extends Frontend
 	 	
 	}
 	
+	/**
+	 * Get Avatars
+	 * @param string
+	 * @param string
+	 * @return string
+	 */
+	public function getAvatar($username, $strTable='')
+	{
+		$objAvatar = $this->Database->prepare("SELECT avatar FROM ". $strTable ." WHERE username=?")->limit(1)->execute($username);
+		if(!$objAvatar->numRows) return '';
+		return $objAvatar->avatar;
+	}
 	
 	/**
 	 * Collect the first n Comments of the corresponding news

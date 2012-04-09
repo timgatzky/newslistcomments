@@ -28,6 +28,8 @@
  * @filesource
  */
 
+$GLOBALS['TL_DCA']['tl_module']['config']['onload_callback'][]=array('tl_module_newslistcomments', 'modifyPalette');
+
 
 /**
  * Selectors
@@ -35,7 +37,8 @@
 array_insert($GLOBALS['TL_DCA']['tl_module']['palettes']['__selector__'],1,array
 (
 	'addNewslistComments',
-	'newslist_comments_messagebox'
+	'newslist_comments_messagebox',
+	'newslist_comments_avatar'
 ));
 
 
@@ -44,8 +47,9 @@ array_insert($GLOBALS['TL_DCA']['tl_module']['palettes']['__selector__'],1,array
  */ 
 array_insert($GLOBALS['TL_DCA']['tl_module']['subpalettes'],1,array
 (
-	'addNewslistComments'	=> 'newslist_comments_limit,newslist_comments_maxLimit,newslist_comments_aliveTime,newslist_comments_annonymus,newslist_comments_dateFormat,newslist_comments_timeFormat,newslist_comments_sortBy,newslist_comments_alwaysShowDelete,newslist_comments_allowAll,newslist_comments_messagebox',
+	'addNewslistComments'	=> 'newslist_comments_limit,newslist_comments_maxLimit,newslist_comments_aliveTime,newslist_comments_annonymus,newslist_comments_dateFormat,newslist_comments_timeFormat,newslist_comments_sortBy,newslist_comments_alwaysShowDelete,newslist_comments_allowAll,newslist_comments_messagebox,newslist_comments_avatar',
 	'newslist_comments_messagebox' => 'newslist_comments_messagebox_template',
+	'newslist_comments_avatar' => 'newslist_comments_avatarSize'
 ));
 
 
@@ -168,9 +172,42 @@ $GLOBALS['TL_DCA']['tl_module']['fields']['newslist_comments_sortBy'] = array
 	'eval'				=> array('tl_class'=>'w50')
 );
 
+$GLOBALS['TL_DCA']['tl_module']['fields']['newslist_comments_avatar'] = array
+(
+	'label'				=> &$GLOBALS['TL_LANG']['tl_module']['newslist_comments_avatar'],
+	'exclude'           => true,
+	'inputType'         => 'checkbox',
+	'eval'              => array('submitOnChange'=>true, 'tl_class'=>'clr'),
+);
+
+$GLOBALS['TL_DCA']['tl_module']['fields']['newslist_comments_avatarSize'] = array
+(
+	'label'                   => &$GLOBALS['TL_LANG']['tl_content']['size'],
+	'exclude'                 => true,
+	'inputType'               => 'imageSize',
+	'options'                 => $GLOBALS['TL_CROP'],
+	'reference'               => &$GLOBALS['TL_LANG']['MSC'],
+	'eval'                    => array('rgxp'=>'digit', 'nospace'=>true, 'helpwizard'=>true, 'tl_class'=>'w50')
+);
+
 
 class tl_module_newslistcomments extends Backend 
 {
-	
+	public function modifyPalette()
+	{
+		// Version-Fallback: Check contao version to use old fashion scalemode for images
+		if (version_compare(VERSION . '.' . BUILD, '2.11.0', '<'))
+			{
+				$GLOBALS['TL_DCA']['tl_module']['fields']['newslist_comments_avatarSize'] = array
+				(
+					'label'                   => &$GLOBALS['TL_LANG']['tl_content']['size'],
+					'exclude'                 => false,
+					'inputType'               => 'imageSize',
+					'options'                 => array('crop', 'proportional', 'box'),
+					'reference'               => &$GLOBALS['TL_LANG']['MSC'],
+					'eval'                    => array('rgxp'=>'digit', 'nospace'=>true, 'tl_class'=>'w50')
+				);
+		}
+	}
 }
 ?>
