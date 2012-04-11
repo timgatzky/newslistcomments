@@ -168,8 +168,6 @@ class NewslistComments extends Frontend
 		
 		// add comments to template
 		$objTemplate->comments = $arrComments;
-		
-		FB::log($arrComments);
 			
 		// Start process when there is POST information submitted by a form
 		if(strlen($_POST['FORM_SUBMIT']))
