@@ -105,6 +105,7 @@ class NewslistComments extends Frontend
 		// add comments to template
 		$arrComments = $this->getComments($arrArticle['id'], $this->intMaxLimit);
 		
+		
 		if($this->intMaxLimit != 0)
 		{
 			$objTemplate->total = $this->intMaxLimit; //$arrComments['total'];
@@ -122,7 +123,7 @@ class NewslistComments extends Frontend
 		$objTemplate->allowAll = $this->intAllowAll;
 		
 		// Avatar
-		if( $this->avatar && in_array('avatar', $this->Config->getActiveModules() ) )
+		if( count($arrComments) > 0 && $this->avatar && in_array('avatar', $this->Config->getActiveModules() ) )
 		{
 			foreach($arrComments as $i => $comment)
 			{
@@ -141,9 +142,35 @@ class NewslistComments extends Frontend
 			}
 		}
 		
+		// add Class even,odd
+		$total = count($arrComments) - 1;
+		for ($i = 0; $i <= $total; $i++)
+		{
+			if($i == 0)
+			{
+				$arrComments[$i]['class'] .= ' first';
+			}
+			
+			if($i%2 == 0)
+			{
+			   	$arrComments[$i]['class'] .= ' even';
+			}
+			else
+			{
+				$arrComments[$i]['class'] .= ' odd';
+			}
+			
+			if($i == $total)
+			{
+				$arrComments[$i]['class'] .= ' last';
+			}
+		}
+		
 		// add comments to template
 		$objTemplate->comments = $arrComments;
-				
+		
+		FB::log($arrComments);
+			
 		// Start process when there is POST information submitted by a form
 		if(strlen($_POST['FORM_SUBMIT']))
 		{
@@ -256,18 +283,19 @@ class NewslistComments extends Frontend
 		// get id of current post
 		$objField = $this->Database->prepare("SELECT id FROM tl_comments WHERE tstamp=? AND source=? AND parent=? AND name=?")
 						->limit(1)
-						->execute($time, $source, $parent, $username);
+						->execute($tstamp, $source, $parent, $username);
 		if(!$objField->numRows) return '';
 					
 		// write information to session
 		$arrData = array(
-			'tstamp'	=> $time, 
+			'tstamp'	=> $tstamp, 
 			'id'		=> $objField->id,
 			'source'	=> 'tl_news', 
 			'pid'		=> $parent, 
 			'user'		=> $username, 
 			'comment'	=> $comment, 
-			'ip'		=> $this->Environment->ip
+			'ip'		=> $this->Environment->ip,
+			'raw'		=> array('tstamp'=>$tstamp),
 		);
 		$this->setSessionData($arrData);
 	}
@@ -345,8 +373,10 @@ class NewslistComments extends Frontend
 				'website'	=> $objComments->website,
 				'comment'	=> $objComments->comment,
 				'tstamp'	=> $objComments->tstamp,
+				'class'		=> $this->getClass($objComments->tstamp),
 				'time'		=> $this->generateTimestamp($objComments->tstamp),
 				'time_elapsed'	=> $this->getTimeElapsed($objComments->tstamp),
+				'raw'		=> array('tstamp' => $objComments->tstamp)
 			);
 			
 			// only show remove link if the comment is not too old
@@ -368,7 +398,7 @@ class NewslistComments extends Frontend
 		$objCommentsCount = $this->Database->prepare("SELECT COUNT(*) ". 'total' . " FROM tl_comments WHERE parent=? AND published=1 AND source='tl_news' ORDER BY tstamp ASC")
 						->execute($id);
 				
-		$arrComments[$objComments->parent]['total'] = $objCommentsCount->total;
+		#$arrComments[$objComments->parent]['total'] = $objCommentsCount->total;
 		
 		return $arrComments[$objComments->parent];
 		
@@ -397,7 +427,7 @@ class NewslistComments extends Frontend
 	 */
 	public function generateTimestamp($tstamp)
 	{
-		return date($this->strDateFormat, $tstamp);;
+		return date($this->strDateFormat, $tstamp);
 	}
 	
 	/**
@@ -422,6 +452,63 @@ class NewslistComments extends Frontend
 		$remaining = floor($this->round_up($time, 0) ); // rounds down
 		return $remaining;
 	}
+	
+	/**
+	 * Get Class
+	 * @param integer
+	 * @return string
+	 */
+	public function getClass($tstamp)
+	{
+		$date = new Date($tstamp);
+		$now = time();
+		$arrClass = array();
+		
+		$thisMin = $tstamp + (60);
+		$thisHour = $tstamp + (60*60);
+		$lastMin -= ($thisMin * 2);
+		$lastHour -= $thisHour * 2;
+		$justAdded = $thisMin + ($this->intAliveTime * 60);
+		
+		
+		if( $now >= $lastMin && $now <= $justAdded )
+		{
+			$arrClass[] = 'justAdded';
+		}
+		if( $now >= $lastMin && $now <= $thisMin )
+		{
+			$arrClass[] = 'lastMinute';
+		}
+		if( $now >= $lastHour && $now <= $thisHour )
+		{
+			$arrClass[] = 'lastHour';
+		}
+		if( $now <= $thisMin )
+		{
+			$arrClass[] = 'thisMinute';
+		}
+		if( $now <= $thisHour )
+		{
+			$arrClass[] = 'thisHour';
+		}
+		if( $now >= $date->__get('dayBegin') && $now <= $date->__get('dayEnd') )
+		{
+			$arrClass[] = 'today';
+		}
+		if( $now >= $date->__get('monthBegin') && $now <= $date->__get('monthEnd') )
+		{
+			$arrClass[] = 'thisMonth';
+		}
+		if( $now >= $date->__get('yearBegin') && $now <= $date->__get('yearEnd') )
+		{
+			$arrClass[] = 'thisYear';
+		}
+		
+		$strClass = implode(' ', $arrClass);
+		
+		return $strClass;
+	}
+	
 	
 	/**
 	 * Reloads the page and adds an anchor if set

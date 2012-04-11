@@ -29,12 +29,12 @@
 
 <!-- comments block // start -->
 <?php if($this->limit == 0) $this->limit = $this->total; ?>
-<?php if($this->comments): ?>
 <div class="commentslist block" id="commentslist<?php echo $this->id; ?>">
 <div class="commentshead"><span class="new_comment" style="cursor:pointer;" onclick="">Kommentieren</span></div>
+<?php if($this->comments): ?>
 <?php for($i = 0; $i < $this->limit; $i++): ?>
 <?php $comment = $this->comments[$i]; if(!$comment) continue; ?>
-<div class="comment <?php echo $class; ?> item<?php echo $i+1; ?>">
+<div class="comment <?php echo $class; ?> item<?php echo $i+1; ?> <?php echo $comment['class']; ?>">
 	<div class="info">
 		<?php if($comment['avatar']): ?><span class="avatar"><img src="<?php echo $comment['avatar']; ?>" title="<?php echo $comment['name']; ?>" alt="<?php echo $comment['name']; ?>" /></span><?php endif; ?>
 		<span class="name"><?php echo $comment['name']; ?></span>
@@ -53,8 +53,9 @@
 <div class="newscomments_accordion">
 	<?php for($i = $this->limit; $i <= $this->total; $i++): ?>
 	<?php $comment = $this->comments[$i]; if(!$comment) continue; ?>
-	<div class="comment <?php echo $class; ?> item<?php echo $i+1; ?>">
+	<div class="comment <?php echo $class; ?> item<?php echo $i+1; ?> <?php echo $comment['class']; ?>">
 		<div class="info">
+			<?php if($comment['avatar']): ?><span class="avatar"><img src="<?php echo $comment['avatar']; ?>" title="<?php echo $comment['name']; ?>" alt="<?php echo $comment['name']; ?>" /></span><?php endif; ?>
 			<span class="name"><?php echo $comment['name']; ?></span>
 			<?php if($comment['website']): ?><a href="<?php echo $comment['website']; ?>" class="website"><?php echo $comment['website']; ?></a><?php endif; ?>
 		</div>
