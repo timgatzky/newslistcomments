@@ -188,48 +188,28 @@ class NewslistComments extends Frontend
 		$size = deserialize($this->avatarSize);
 		
 		// use default avatar
-		if($username == $this->strUnknownUser && strlen($this->defaultAvatar))
+		if($username == $this->strUnknownUser && strlen($this->defaultAvatar) )
 		{
-			// resize if set
-			if($size)
-			{
-				$size = deserialize($this->avatarSize);
-				$strImage = $this->getImage($this->defaultAvatar, $size[0],$size[1],$size[2] );
-			}
-			else
-			{
-				$strImage = $this->getImage($this->defaultAvatar);
-			}
-			
-			$strAvatar = $strImage;
+			$strAvatar = $this->defaultAvatar;
 		}
 		else
 		{
-			$strAvatar = '';
 			$objUser = $this->Database->prepare("SELECT id,firstname,lastname,avatar FROM ". $strTable ." WHERE username=?")->limit(1)->execute($username);
 			
 			if($objUser->numRows)
 			{
 				$strAvatar = $objUser->avatar;
 				$strRealName = $objUser->firstname . ' ' . $objUser->lastname;
+				
+				if(!$objUser->avatar)
+				{
+					$strAvatar = $this->defaultAvatar;
+				}
 			}
 			else
 			{
 				$strAvatar = $this->defaultAvatar;
 			}
-			
-			// resize if set
-			if($size)
-			{
-				$size = deserialize($this->avatarSize);
-				$strImage = $this->getImage($strAvatar, $size[0],$size[1],$size[2] );
-			}
-			else
-			{
-				$strImage = $this->getImage($strAvatar);
-			}
-			
-			$strAvatar = $strImage;
 			
 			if($this->avatarJumpTo)
 			{
@@ -241,13 +221,14 @@ class NewslistComments extends Frontend
 					$strUrl = ampersand( $this->generateFrontendUrl( $objPage->row()) );
 					$strUrl .= '?show='.$objUser->id;
 				}
-				
-				
-				
 			}
-			
-			
+		}
 		
+		// resize if set
+		if($size)
+		{
+			$size = deserialize($this->avatarSize);
+			$strAvatar = $this->getImage($strAvatar, $size[0],$size[1],$size[2] );
 		}
 		
 		// size
@@ -261,11 +242,9 @@ class NewslistComments extends Frontend
 			$strSize .= 'height="'.$size[1].'" ';
 		}
 		
-		// title
-		$strImage = '<img src="' .$strImage. '" ' . $strSize .' title="'. $username . '" alt="' . $username  . '"' . ' />';		
-		
-		$strReturn = $strImage;
-		
+		// generate image string
+		$strImage = '<img src="' .$strAvatar. '" ' . $strSize .' title="'. $username . '" alt="' . $username  . '"' . ' />';		
+				
 		// anchor
 		if(strlen($strUrl))
 		{
@@ -273,11 +252,16 @@ class NewslistComments extends Frontend
 			{	
 				$title = sprintf($GLOBALS['TL_LANG']['newslistcomments']['jumpTo'], $strRealName);
 			}
-		
-			$strAnchor = sprintf('<a href="%s" title="%s">' . $strImage . '</a>', $strUrl, $title);
 			
+			//$strAnchor = sprintf('<a href="%s" title="%s">' . $strImage . '</a>', $strUrl, $title);
+			$strAnchor = '<a href="' . $strUrl . '" title="'. $title .'">' . $strImage . '</a>';
 			$strReturn = $strAnchor;
 		}
+		else
+		{
+			$strReturn = $strImage;
+		}
+		
 		
 		return $strReturn;
 	}
