@@ -32,4 +32,5 @@ $GLOBALS['TL_LANG']['newslistcomments']['submit'] = 'Abschicken';
 $GLOBALS['TL_LANG']['newslistcomments']['comment_default'] = 'Schreibe einen Kommentar ...';
 $GLOBALS['TL_LANG']['newslistcomments']['delete'] = 'L&ouml;schen';
 $GLOBALS['TL_LANG']['newslistcomments']['news_default'] = "Was gibt's neues";
+$GLOBALS['TL_LANG']['newslistcomments']['jumpTo'] = "Sieh Dir %s's Profil an.";
 ?>

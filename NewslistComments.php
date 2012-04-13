@@ -86,6 +86,8 @@ class NewslistComments extends Frontend
 				$this->sortBy = $objModuleNewslists->newslist_comments_sortBy;
 				$this->avatar =  $objModuleNewslists->newslist_comments_avatar;
 				$this->avatarSize =  $objModuleNewslists->newslist_comments_avatarSize;
+				$this->defaultAvatar = $objModuleNewslists->newslist_comments_singleSRC;
+				$this->avatarJumpTo = $objModuleNewslists->newslist_comments_jumpTo;
 			}
 		}
 		
@@ -122,23 +124,14 @@ class NewslistComments extends Frontend
 		// Allow all users
 		$objTemplate->allowAll = $this->intAllowAll;
 		
+		
 		// Avatar
 		if( count($arrComments) > 0 && $this->avatar && in_array('avatar', $this->Config->getActiveModules() ) )
 		{
 			foreach($arrComments as $i => $comment)
 			{
-				if($comment['name'] != $this->strUnknownUser)
-				{
-					$strAvatarUrl = $this->getAvatar($comment['name'], 'tl_member');
-					$arrComments[$i]['avatar'] = $strAvatarUrl;
-					
-					// Overwrite avatar size
-					if(strlen($this->avatarSize))
-					{
-						$size = deserialize($this->avatarSize);
-						$arrComments[$i]['avatar'] = $this->getImage($strAvatarUrl, $size[0],$size[1],$size[2] );
-					}
-				}
+				$strAvatarUrl = $this->getAvatar($comment['name'], 'tl_member');
+				$arrComments[$i]['avatar'] = $strAvatarUrl;
 			}
 		}
 		
@@ -177,6 +170,116 @@ class NewslistComments extends Frontend
 					
 		return $arrArticles;
 		
+	}
+	
+		
+	/**
+	 * Get Avatars
+	 * @param string
+	 * @param string
+	 * @return string
+	 */
+	public function getAvatar($username, $strTable='')
+	{
+		
+		$strImage = '';
+		$strAvatar = '';
+		$strRealName = '';
+		$size = deserialize($this->avatarSize);
+		
+		// use default avatar
+		if($username == $this->strUnknownUser && strlen($this->defaultAvatar))
+		{
+			// resize if set
+			if($size)
+			{
+				$size = deserialize($this->avatarSize);
+				$strImage = $this->getImage($this->defaultAvatar, $size[0],$size[1],$size[2] );
+			}
+			else
+			{
+				$strImage = $this->getImage($this->defaultAvatar);
+			}
+			
+			$strAvatar = $strImage;
+		}
+		else
+		{
+			$strAvatar = '';
+			$objUser = $this->Database->prepare("SELECT id,firstname,lastname,avatar FROM ". $strTable ." WHERE username=?")->limit(1)->execute($username);
+			
+			if($objUser->numRows)
+			{
+				$strAvatar = $objUser->avatar;
+				$strRealName = $objUser->firstname . ' ' . $objUser->lastname;
+			}
+			else
+			{
+				$strAvatar = $this->defaultAvatar;
+			}
+			
+			// resize if set
+			if($size)
+			{
+				$size = deserialize($this->avatarSize);
+				$strImage = $this->getImage($strAvatar, $size[0],$size[1],$size[2] );
+			}
+			else
+			{
+				$strImage = $this->getImage($strAvatar);
+			}
+			
+			$strAvatar = $strImage;
+			
+			if($this->avatarJumpTo)
+			{
+				$objPage = $this->Database->prepare("SELECT id, alias FROM tl_page WHERE id=?")
+									 	  ->limit(1)
+										  ->execute($this->avatarJumpTo);
+				if ($objPage->numRows)
+				{
+					$strUrl = ampersand( $this->generateFrontendUrl( $objPage->row()) );
+					$strUrl .= '?show='.$objUser->id;
+				}
+				
+				
+				
+			}
+			
+			
+		
+		}
+		
+		// size
+		$strSize = '';
+		if($size[0] != '')
+		{
+			$strSize .= 'width="'.$size[0].'" ';
+		}
+		if($size[1] != '')
+		{
+			$strSize .= 'height="'.$size[1].'" ';
+		}
+		
+		// title
+		$strImage = '<img src="' .$strImage. '" ' . $strSize .' title="'. $username . '" alt="' . $username  . '"' . ' />';		
+		
+		$strReturn = $strImage;
+		
+		// anchor
+		if(strlen($strUrl))
+		{
+			if(strlen($strRealName))
+			{	
+				$title = sprintf($GLOBALS['TL_LANG']['newslistcomments']['jumpTo'], $strRealName);
+			}
+		
+			$strAnchor = sprintf('<a href="%s" title="%s">' . $strImage . '</a>', $strUrl, $title);
+			
+			$strReturn = $strAnchor;
+		}
+		
+		return $strReturn;
 	}
 	
 	/**
@@ -330,19 +433,7 @@ class NewslistComments extends Frontend
 		}
 	 	
 	}
-	
-	/**
-	 * Get Avatars
-	 * @param string
-	 * @param string
-	 * @return string
-	 */
-	public function getAvatar($username, $strTable='')
-	{
-		$objAvatar = $this->Database->prepare("SELECT avatar FROM ". $strTable ." WHERE username=?")->limit(1)->execute($username);
-		if(!$objAvatar->numRows) return '';
-		return $objAvatar->avatar;
-	}
+
 	
 	/**
 	 * Collect the first n Comments of the corresponding news

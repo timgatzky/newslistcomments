@@ -36,7 +36,7 @@
 <?php $comment = $this->comments[$i]; if(!$comment) continue; ?>
 <div class="comment <?php echo $class; ?> item<?php echo $i+1; ?> <?php echo $comment['class']; ?>">
 	<div class="info">
-		<?php if($comment['avatar']): ?><span class="avatar"><img src="<?php echo $comment['avatar']; ?>" title="<?php echo $comment['name']; ?>" alt="<?php echo $comment['name']; ?>" /></span><?php endif; ?>
+		<?php if($comment['avatar']): ?><span class="avatar"><?php echo $comment['avatar']; ?></span><?php endif; ?>
 		<span class="name"><?php echo $comment['name']; ?></span>
 		<?php if($comment['website']): ?><a href="<?php echo $comment['website']; ?>" class="website"><?php echo $comment['website']; ?></a><?php endif; ?>
 	</div>
@@ -55,7 +55,7 @@
 	<?php $comment = $this->comments[$i]; if(!$comment) continue; ?>
 	<div class="comment <?php echo $class; ?> item<?php echo $i+1; ?> <?php echo $comment['class']; ?>">
 		<div class="info">
-			<?php if($comment['avatar']): ?><span class="avatar"><img src="<?php echo $comment['avatar']; ?>" title="<?php echo $comment['name']; ?>" alt="<?php echo $comment['name']; ?>" /></span><?php endif; ?>
+			<?php if($comment['avatar']): ?><span class="avatar"><?php echo $comment['avatar']; ?></span><?php endif; ?>
 			<span class="name"><?php echo $comment['name']; ?></span>
 			<?php if($comment['website']): ?><a href="<?php echo $comment['website']; ?>" class="website"><?php echo $comment['website']; ?></a><?php endif; ?>
 		</div>

@@ -32,4 +32,5 @@ $GLOBALS['TL_LANG']['newslistcomments']['submit'] = 'Submit';
 $GLOBALS['TL_LANG']['newslistcomments']['comment_default'] = 'Write a comment ...';
 $GLOBALS['TL_LANG']['newslistcomments']['delete'] = 'Remove';
 $GLOBALS['TL_LANG']['newslistcomments']['news_default'] = "What'is new?";
+$GLOBALS['TL_LANG']['newslistcomments']['jumpTo'] = "Go to %s's page.";
 ?>

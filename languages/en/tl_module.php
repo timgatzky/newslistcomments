@@ -46,6 +46,7 @@ $GLOBALS['TL_LANG']['tl_module']['newslist_comments_messagebox_template'] 	= arr
 $GLOBALS['TL_LANG']['tl_module']['newslist_comments_sortBy'] 				= array('Sorting', 'Choose sorting');
 $GLOBALS['TL_LANG']['tl_module']['newslist_comments_sortBy']['DESC'] 		= array('Latest comments first','');
 $GLOBALS['TL_LANG']['tl_module']['newslist_comments_sortBy']['ASC'] 		= array('Oldest comments first','');
+$GLOBALS['TL_LANG']['tl_module']['newslist_comments_avatar'] 				= array('Add Avatar', '');
 
 /**
  * Legends

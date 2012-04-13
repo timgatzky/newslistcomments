@@ -49,7 +49,7 @@ array_insert($GLOBALS['TL_DCA']['tl_module']['subpalettes'],1,array
 (
 	'addNewslistComments'	=> 'newslist_comments_limit,newslist_comments_maxLimit,newslist_comments_aliveTime,newslist_comments_annonymus,newslist_comments_dateFormat,newslist_comments_timeFormat,newslist_comments_sortBy,newslist_comments_alwaysShowDelete,newslist_comments_allowAll,newslist_comments_messagebox,newslist_comments_avatar',
 	'newslist_comments_messagebox' => 'newslist_comments_messagebox_template',
-	'newslist_comments_avatar' => 'newslist_comments_avatarSize'
+	'newslist_comments_avatar' => 'newslist_comments_jumpTo,newslist_comments_avatarSize,newslist_comments_singleSRC'
 ));
 
 
@@ -190,6 +190,9 @@ $GLOBALS['TL_DCA']['tl_module']['fields']['newslist_comments_avatarSize'] = arra
 	'eval'                    => array('rgxp'=>'digit', 'nospace'=>true, 'helpwizard'=>true, 'tl_class'=>'w50')
 );
 
+$GLOBALS['TL_DCA']['tl_module']['fields']['newslist_comments_jumpTo'] = $GLOBALS['TL_DCA']['tl_module']['fields']['jumpTo'];
+$GLOBALS['TL_DCA']['tl_module']['fields']['newslist_comments_singleSRC'] = $GLOBALS['TL_DCA']['tl_module']['fields']['singleSRC'];
+$GLOBALS['TL_DCA']['tl_module']['fields']['newslist_comments_singleSRC']['eval']['mandatory'] = false;
 
 class tl_module_newslistcomments extends Backend 
 {
