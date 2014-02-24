@@ -1,0 +1,18 @@
+<!-- indexer::stop -->
+<div class="form form_newscomments">
+<form action="<?php echo $this->action;?>" id="<?php echo 'com_form_newscomment_' . $this->id; ?>" name="<?php echo $this->formName; ?>" method="post">
+<div class="formbody">
+<input type="hidden" name="FORM_SUBMIT" value="<?php echo $this->formName; ?>" />
+<input type="hidden" name="NEWSLIST_ID" value="<?php echo $this->module; ?>" />
+<input type="hidden" name="NEWS_ID" value="<?php echo $this->id; ?>" />
+<input type="hidden" name="REQUEST_TOKEN" value="{{request_token}}" />
+<span class="widget">
+	<input type="text" class="text" placeholder="<?php echo $GLOBALS['TL_LANG']['newslistcomments']['comment_default']; ?>" value="" name="NEW_COMMENT" />
+</span>
+<span class="submit_container">
+  <input type="submit" class="submit" name="<?php echo $GLOBALS['TL_LANG']['newslistcomments']['submit']; ?>" value="<?php echo $GLOBALS['TL_LANG']['newslistcomments']['submit']; ?>" />
+</span>
+</div>
+</form>
+</div>
+<!-- indexer::continue -->

@@ -1,0 +1,21 @@
+
+<div class="comments block">
+<?php foreach($this->comments as $comment): ?>
+<div class="head"><span class="new_comment">Kommentieren</span></div>
+<div class="<?php echo $comment['class']; ?>">
+	<div class="info">
+		<?php if($comment['avatar']): ?><span class="avatar"><?php echo $comment['avatar']; ?></span><?php endif; ?>
+		<span class="name"><?php echo $comment['name']; ?></span>
+		<?php if($comment['website']): ?><a href="<?php echo $comment['website']; ?>" class="website"><?php echo $comment['website']; ?></a><?php endif; ?>
+	</div>
+	<div class="text"><?php echo $comment['comment']; ?></div>
+	<div class="timestamp"><span class="time"><?php echo $comment['time']; ?></span><span class="time"><?php echo $comment['time_elapsed']; ?></span></div>
+	<?php if($comment['remove_link']): ?><div class="remove"><a href="<?php echo $comment['remove_link']; ?>"><?php echo $GLOBALS['TL_LANG']['newslistcomments']['delete']; ?></a><span class="time_remaining">(<?php echo $comment['time_remaining']; ?>)</span></div><?php endif; ?>
+</div>
+<?php endforeach; ?>
+
+<?php if( $this->allowComments || $this->allowAll ): ?>
+<?php echo $this->commentForm; ?>
+<?php endif;?>
+
+</div>
