@@ -33,6 +33,7 @@ class NewslistComments extends \Frontend
 	protected $intAvatar;
 	protected $strTemplateComments 	= 'newslist_comments';
 	protected $strTemplateForm 		= 'form_newslistcomments';
+	protected $bolAjax = true;
 	
 	/**
 	 * Add comments to the newslist template 
@@ -46,8 +47,10 @@ class NewslistComments extends \Frontend
 		{
 			return $arrArticle;
 		}
-			
+		
+		$objSession = \Session::getInstance();
 		$objDatabase = \Database::getInstance();
+		$objInput = \Input::getInstance();
 		
 		// Check if comments are allowed
 		$objArchive = $objDatabase->prepare("SELECT * FROM tl_news_archive WHERE id=?")->limit(1)->execute( $arrArticle['pid'] );
@@ -74,25 +77,56 @@ class NewslistComments extends \Frontend
 		$this->avatarJumpTo = $objModule->newslist_comments_jumpTo;
 		$this->strTemplateComments = $objModule->newslist_comments_template;
 		
+		// build a session array
+		$arrSession = $objSession->get('newslistcomments');
+		if(!$arrSession)
+		{
+			$arrSession = array();
+		}
+		
+		// reset limit on ajax request
+		if(\Input::post('cmd_loadNews') > 0)
+		{
+			$arrSession[$arrArticle['id']] = array('limit'=>$this->intMaxLimit);
+			$objSession->set('newslistcomments',$arrSession);
+		}
+		
+		// check if a limit is set for this news entry in the session
+		if($arrSession[$arrArticle['id']])
+		{
+			$this->intLimit = $arrSession[$arrArticle['id']]['limit'];
+		}
+		
+		// fetch comments
+		$arrComments = $this->getComments($arrArticle['id'], $this->intLimit);
+		
+		// remove comment from comments array on ajax request
+		if(!empty($arrComments) && $objInput->post('cmd_remove_comment') && $objInput->post('parent'))
+		{
+			foreach($arrComments as $i => $comment)
+			{
+				if($comment['id'] == $objInput->post('cmd_remove_comment'))
+				{
+					unset($arrComments[$i]);
+				}
+			}
+		}
+		
 		// comments list template
 		$objCommentsTemplate = new \FrontendTemplate($this->strTemplateComments);
+		$objCommentsTemplate->setData($arrArticle);
 		$objCommentsTemplate->limit = $this->intLimit;
-		
-		// get comments for this news entry
-		$arrComments = $this->getComments($arrArticle['id'], $this->intMaxLimit);
-		
-		if($this->intMaxLimit > 0)
-		{
-			$objCommentsTemplate->total = $this->intMaxLimit; //$arrComments['total'];
-		}
-		else
-		{
-			$objCommentsTemplate->total = count($arrComments);
-		}
+		$objCommentsTemplate->total = count($arrComments);
 		
 		if(FE_USER_LOGGED_IN || $this->intAllowAll)
 		{
 			$objCommentsTemplate->allowComments = true;
+			$objTemplate->allowComments = true;
+		}
+		else
+		{
+			$objTemplate->allowComments = false;
+			$objCommentsTemplate->allowComments = false;
 		}
 		
 		// Avatar
@@ -107,6 +141,12 @@ class NewslistComments extends \Frontend
 		
 		$objCommentsTemplate->comments = $arrComments;
 		
+		// load more link
+		if($this->intLimit > $this->intMaxLimit)
+		{
+			$objCommentsTemplate->more = '<a href="'.\Environment::get('request').'#" onclick="NewslistComments.load(this,'.$arrArticle['id'].');return this;">'.$GLOBALS['TL_LANG']['newslistcomments']['loadMore'].'</a>';
+		}
+		
 		// comment form
 		$objCommentsForm = new \FrontendTemplate($this->strTemplateForm);
 		$objCommentsForm->id = $arrArticle['id'];
@@ -117,10 +157,11 @@ class NewslistComments extends \Frontend
 		$objCommentsTemplate->commentForm = $objCommentsForm->parse();
 		
 		// add comments to template
-		$objTemplate->comments = $objCommentsTemplate->parse();
-						
-		return $arrArticles;
+		$objTemplate->comments = trim($objCommentsTemplate->parse());
 		
+		$GLOBALS['TL_JAVASCRIPT'][] = 'system/modules/newslistcomments/assets/js/NewslistComments.js';
+					
+		return $arrArticles;
 	}
 	
 		
@@ -225,8 +266,7 @@ class NewslistComments extends \Frontend
 			$this->_reload();			
 		}
 		
-			
-		// remove a comment
+		// remove a comment by GET
 		if($objInput->get('cmd_remove_comment') && $objInput->get('parent'))
 		{
 			$this->removeComment($objInput->get('cmd_remove_comment'), $objInput->get('parent'));
@@ -236,7 +276,15 @@ class NewslistComments extends \Frontend
 			
 			$this->redirect($url);
 		}
-	
+		
+		// remove a comment by POST
+		if($objInput->post('cmd_remove_comment') && $objInput->post('parent'))
+		{
+			$this->removeComment($objInput->post('cmd_remove_comment'), $objInput->post('parent'));
+			
+			global $objPage;
+			$url = $this->generateFrontendUrl($objPage->row());
+		}
 	}
 	
 	
@@ -253,7 +301,8 @@ class NewslistComments extends \Frontend
 		$time = time();
 		
 		$arrSet = array(
-			'tstamp'	=> $time, 
+			'tstamp'	=> $time,
+			'date'		=> $time,
 			'source'	=> strlen($strSource) > 0 ? $strSource : 'tl_news', 
 			'parent'	=> $intParent, 
 			'name'		=> (FE_USER_LOGGED_IN ? $objUser->username : $this->strUnknownUser), 
@@ -317,6 +366,7 @@ class NewslistComments extends \Frontend
 			(
 				'id'			=> $objComments->id,
 				'name'			=> $objComments->name,
+				'parent'		=> $objComments->parent,
 				'email'			=> $objComments->email,
 				'website'		=> $objComments->website,
 				'comment'		=> $objComments->comment,
@@ -452,7 +502,7 @@ class NewslistComments extends \Frontend
 		$this->redirect($url);
 		#header('Location: ' . $page . ''); // avoid false repost
 	}
-	
+		
 	
 	/**
 	 * Round a number

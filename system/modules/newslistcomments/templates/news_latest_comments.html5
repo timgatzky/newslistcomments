@@ -39,5 +39,6 @@
   <div class="comments block">
   <?php echo $this->comments;  ?>
   </div>
+  
   <?php endif;?>
 </div>

@@ -29,7 +29,6 @@ TemplateLoader::addFiles(array
 (
 	'form_messagebox'       => 'system/modules/newslistcomments/templates',
 	'form_newslistcomments' => 'system/modules/newslistcomments/templates',
-	'mod_newslist'          => 'system/modules/newslistcomments/templates',
 	'moo_newslistcomments'  => 'system/modules/newslistcomments/templates',
 	'news_latest_comments'  => 'system/modules/newslistcomments/templates',
 	'newslist_comments'		=> 'system/modules/newslistcomments/templates',
